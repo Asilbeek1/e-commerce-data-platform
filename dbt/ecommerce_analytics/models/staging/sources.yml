@@ -1,0 +1,59 @@
+version: 2
+
+sources:
+  - name: ecommerce
+    schema: raw
+    tables:
+      - name: orders
+      - name: customers
+      - name: products
+      - name: order_items
+      - name: payments
+      - name: refunds
+
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_products
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_orders_items
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_payments
+    columns:
+      - name: payment_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_refunds
+    columns:
+      - name: refund_id
+        data_tests:
+          - unique
+          - not_null
+

@@ -1,0 +1,13 @@
+ecommerce_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      user: analytics_user
+      password: dev_only_change_me
+      port: 5432
+      dbname: ecommerce
+      schema: analytics
+      threads: 4
+      sslmode: disable
