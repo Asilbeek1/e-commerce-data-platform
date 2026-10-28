@@ -3,7 +3,7 @@ ecommerce_analytics:
   outputs:
     dev:
       type: postgres
-      host: postgres
+      host: ecommerce_postgres
       user: analytics_user
       password: dev_only_change_me
       port: 5432
