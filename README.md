@@ -5,7 +5,7 @@
 ```
 PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
                           ↑
-                   Airflow (в разработке)
+                 Airflow (запуск dbt раз в день)
 ```
 
 ## Структура проекта
@@ -27,7 +27,11 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 │           └── marts/              # витрины для дашборда (tables)
 ├── datalens/
 │   └── ecommerce_workbook.json     # экспорт воркбука DataLens
-└── airflow/                        # оркестрация dbt (в разработке)
+└── airflow/
+    ├── docker-compose.yaml         # Airflow 3.3 (CeleryExecutor)
+    ├── Dockerfile                  # образ Airflow + dbt
+    ├── .env.example                # шаблон настроек (UID, порт)
+    └── dags/dbt_build.py           # DAG: dbt debug → dbt build
 ```
 
 ## Модель данных
@@ -59,7 +63,7 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 
 - Docker Desktop (на Windows — с включённой WSL integration для Ubuntu)
 - Git
-- Свободные порты: `5432` (PostgreSQL), `8080` (DataLens)
+- Свободные порты: `5432` (PostgreSQL), `8080` (DataLens), `8081` (Airflow)
 
 На Windows все команды ниже выполняются в терминале **Ubuntu (WSL)**, а не в PowerShell.
 
@@ -71,11 +75,12 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 git clone git@github.com:Asilbeek1/e-commerce-data-platform.git
 cd e-commerce-data-platform
 
+docker network create ecommerce_shared   # один раз: общая сеть для базы, dbt и Airflow
 docker compose up -d
 docker compose run --rm dbt build
 ```
 
-Проверка: `dbt build` должен закончиться строкой `Done. PASS=27 WARN=0 ERROR=0`.
+Проверка: `dbt build` должен закончиться строкой `Done. PASS=36 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
@@ -126,6 +131,7 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 cd ~/e-commerce-data-platform && docker compose up -d
 cd ~/datalens && docker compose up -d
 docker network connect --alias ecommerce-postgres datalens_default ecommerce_postgres
+cd ~/e-commerce-data-platform/airflow && docker compose up -d
 ```
 
 Сообщение `already exists` у последней команды — это нормально.
@@ -140,10 +146,27 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 | `Unable to parse host: ecommerce_postgres` | DataLens не принимает `_` в имени хоста — используйте алиас `ecommerce-postgres` |
 | `password authentication failed` | браузер подставил сохранённый `admin` в поля логина и пароля — введите данные вручную |
 | `HC=1 is not recognized` | команда запущена в PowerShell — откройте Ubuntu |
+| `network ecommerce_shared declared as external, but could not be found` | сеть не создана: `docker network create ecommerce_shared` |
+| задача `dbt_debug` в Airflow падает на подключении | база проекта не запущена — `docker compose up -d` в корне репозитория, затем перезапустите задачу |
 
-## Airflow (в разработке)
+## Airflow
 
-В папке `airflow/` лежит конфигурация Airflow 3.3 (CeleryExecutor) и DAG `dbt_build.py` для запуска dbt по расписанию. Перед запуском вместе с DataLens нужно сменить порт веб-интерфейса Airflow с `8080` на свободный (например, `8081:8080` в `airflow/docker-compose.yaml`), иначе он конфликтует с DataLens.
+Airflow раз в день запускает dbt, чтобы витрины обновлялись без ручных команд. DAG `ecommerce_dbt_build` состоит из двух задач: `dbt_debug` (проверка подключения) → `dbt_build` (модели и тесты). dbt установлен прямо в образ Airflow и подключается к базе `ecommerce_postgres` через общую сеть `ecommerce_shared`.
+
+Нужно не меньше 4 ГБ свободной памяти для Docker.
+
+**Первый запуск** (база проекта уже должна быть запущена):
+
+```bash
+cd airflow
+cp .env.example .env
+sed -i "s/AIRFLOW_UID=.*/AIRFLOW_UID=$(id -u)/" .env
+docker compose up -d --build
+```
+
+Первая сборка образа занимает 5–10 минут. Затем откройте http://localhost:8081 (логин `airflow`, пароль `airflow`), найдите DAG `ecommerce_dbt_build`, включите его переключателем и нажмите ▶ (Trigger), чтобы запустить сразу.
+
+Порт по умолчанию — `8081`, потому что `8080` занят DataLens. Изменить можно в `airflow/.env` (`AIRFLOW_PORT`).
 
 ## Безопасность
 
