@@ -1,47 +1,37 @@
-import os
 from datetime import datetime
 
-from airflow import DAG
-from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import DAG
 
-PROJECT_ROOT = os.environ.get(
-    "PROJECT_ROOT",
-    os.path.expanduser("~/e-commerce-data-platform"),
+DBT = "/opt/dbt-venv/bin/dbt"
+PROJECT_DIR = "/opt/airflow/dbt/ecommerce_analytics"
+PROFILES_DIR = "/opt/airflow/dbt"
+
+# logs/ and target/ go to /tmp so the worker never fights over file permissions
+# with the `docker compose run dbt` container, which writes as root
+COMMON_FLAGS = (
+    f"--project-dir {PROJECT_DIR} "
+    f"--profiles-dir {PROFILES_DIR} "
+    "--log-path /tmp/dbt_logs"
 )
 
 with DAG(
     dag_id="ecommerce_dbt_build",
     description="Build e-commerce analytics models with dbt",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@daily",
     catchup=False,
     tags=["dbt", "ecommerce"],
 ) as dag:
 
-    dbt_build = DockerOperator(
-        task_id="dbt_build",
-        image="e-commerce-data-platform-dbt:latest",
-        command=["build"],
-        docker_url="unix://var/run/docker.sock",
-        network_mode="ecommerce_shared",
-        auto_remove="success",
-                mounts=[
-            {
-                "Source": f"{PROJECT_ROOT}/dbt/ecommerce_analytics",
-                "Target": "/usr/app",
-                "Type": "bind",
-            },
-            {
-                "Source": f"{PROJECT_ROOT}/dbt/profiles.yml",
-                "Target": "/root/.dbt/profiles.yml",
-                "Type": "bind",
-                "ReadOnly": True,
-            },
-        ],
-        working_dir="/usr/app",
-        environment={
-            "DBT_PROFILES_DIR": "/root/.dbt",
-        },
-        mount_tmp_dir=False,
+    dbt_debug = BashOperator(
+        task_id="dbt_debug",
+        bash_command=f"{DBT} debug {COMMON_FLAGS}",
     )
 
+    dbt_build = BashOperator(
+        task_id="dbt_build",
+        bash_command=f"{DBT} build {COMMON_FLAGS} --target-path /tmp/dbt_target",
+    )
+
+    dbt_debug >> dbt_build
