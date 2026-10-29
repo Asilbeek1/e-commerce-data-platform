@@ -1,3 +1,4 @@
+
 version: 2
 
 sources:
@@ -21,6 +22,10 @@ models:
       - name: customer_id
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
 
   - name: stg_customers
     columns:
@@ -42,6 +47,20 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
 
   - name: stg_payments
     columns:
@@ -49,6 +68,13 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
 
   - name: stg_refunds
     columns:
@@ -56,4 +82,11 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
 

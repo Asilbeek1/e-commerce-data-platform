@@ -1,10 +1,13 @@
-
+import os
 from datetime import datetime
 
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
 
-PROJECT_ROOT = "/home/asilbek/e-commerce-data-platform"
+PROJECT_ROOT = os.environ.get(
+    "PROJECT_ROOT",
+    os.path.expanduser("~/e-commerce-data-platform"),
+)
 
 with DAG(
     dag_id="ecommerce_dbt_build",

@@ -18,7 +18,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
+    networks:
+      - ecommerce_shared
   dbt:
     build:
       context: .
@@ -33,7 +34,12 @@ services:
         condition: service_healthy
     environment:
       DBT_PROFILES_DIR: /root/.dbt
+    networks:
+      - ecommerce_shared
 
 volumes:
   postgres_data:
 
+networks:
+  ecommerce_shared:
+    external: true
