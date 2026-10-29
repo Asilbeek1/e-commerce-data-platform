@@ -1,0 +1,4 @@
+refund_id,order_id,amount,status,refunded_at
+1,10030,72.00,completed,2026-10-02 10:00:00
+2,10004,20.00,pending,2026-10-05 14:30:00
+3,10010,15.00,completed,2026-10-08 09:45:00

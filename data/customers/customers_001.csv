@@ -1,0 +1,21 @@
+customer_id,full_name,email,registered_at
+1,Amina Karimova,amina.karimova@example.com,2026-01-05 09:15:00
+2,Jasur Tursunov,jasur.tursunov@example.com,2026-01-08 14:20:00
+3,Madina Rakhimova,madina.rakhimova@example.com,2026-01-12 11:05:00
+4,Bekzod Aliyev,bekzod.aliyev@example.com,2026-01-20 16:45:00
+5,Dilnoza Ismoilova,dilnoza.ismoilova@example.com,2026-02-02 10:00:00
+6,Sardor Abdullayev,sardor.abdullayev@example.com,2026-02-11 13:30:00
+7,Malika Yusupova,malika.yusupova@example.com,2026-02-18 08:50:00
+8,Azizbek Qodirov,azizbek.qodirov@example.com,2026-03-01 17:10:00
+9,Shahnoza Ergasheva,shahnoza.ergasheva@example.com,2026-03-07 12:40:00
+10,Farrukh Saidov,farrukh.saidov@example.com,2026-03-15 15:25:00
+11,Nodira Usmanova,nodira.usmanova@example.com,2026-04-02 09:35:00
+12,Timur Nazarov,timur.nazarov@example.com,2026-04-10 18:05:00
+13,Sevara Boboyeva,sevara.boboyeva@example.com,2026-04-21 10:10:00
+14,Akmal Rahmonov,akmal.rahmonov@example.com,2026-05-03 14:55:00
+15,Gulnoza Kamilova,gulnoza.kamilova@example.com,2026-05-16 11:45:00
+16,Otabek Shermatov,otabek.shermatov@example.com,2026-06-01 09:05:00
+17,Lola Mamatova,lola.mamatova@example.com,2026-06-12 16:30:00
+18,Shahzod Bekmurodov,shahzod.bekmurodov@example.com,2026-07-04 12:15:00
+19,Nargiza Akhmedova,nargiza.akhmedova@example.com,2026-08-09 10:30:00
+20,Rustam Khasanov,rustam.khasanov@example.com,2026-09-14 13:20:00

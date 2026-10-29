@@ -6,7 +6,7 @@ from airflow.providers.docker.operators.docker import DockerOperator
 
 PROJECT_ROOT = os.environ.get(
     "PROJECT_ROOT",
-    os.path.expanduser("~/e-commerce-data-platform"),
+    os.path.expanduser("/home/asilbek/e-commerce-data-platform"),
 )
 
 with DAG(
