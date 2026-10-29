@@ -22,3 +22,7 @@ logs/
 .DS_Store
 *.swp
 *.swo
+
+# Airflow (generated at first start, contains secrets)
+airflow/config/airflow.cfg
+airflow/plugins/

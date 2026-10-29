@@ -23,9 +23,8 @@ models:
         data_tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('stg_customers')
-                field: customer_id
+              to: ref('stg_customers')
+              field: customer_id
 
   - name: stg_customers
     columns:
@@ -51,16 +50,14 @@ models:
         data_tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('stg_orders')
-                field: order_id
+              to: source('ecommerce', 'orders')
+              field: order_id
       - name: product_id
         data_tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('stg_products')
-                field: product_id
+              to: ref('stg_products')
+              field: product_id
 
   - name: stg_payments
     columns:
@@ -72,9 +69,8 @@ models:
         data_tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('stg_orders')
-                field: order_id
+              to: source('ecommerce', 'orders')
+              field: order_id
 
   - name: stg_refunds
     columns:
@@ -86,7 +82,6 @@ models:
         data_tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('stg_orders')
-                field: order_id
+              to: source('ecommerce', 'orders')
+              field: order_id
 
