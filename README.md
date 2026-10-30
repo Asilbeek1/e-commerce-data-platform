@@ -74,7 +74,7 @@ CSV (data/)  →  PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens 
 ### 1. База и dbt
 
 ```bash
-git clone git@github.com:Asilbeek1/e-commerce-data-platform.git
+git clone https://github.com/Asilbeek1/e-commerce-data-platform.git
 cd e-commerce-data-platform
 
 docker network create ecommerce_shared   # один раз: общая сеть для базы, dbt и Airflow
@@ -131,7 +131,7 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 | Username | `analytics_user` |
 | Password | `dev_only_change_me` |
 
-Датасеты создаются из таблиц схемы `analytics` (`mart_*`).
+Датасеты создаются из таблиц схемы `analytics` (`mart_*` и `fct_orders`).
 
 ## Ежедневный запуск
 
@@ -153,7 +153,7 @@ Airflow раз в день загружает свежие CSV и пересоб
 **Первый запуск** (база проекта уже должна быть запущена):
 
 ```bash
-cd airflow
+cd ~/e-commerce-data-platform/airflow
 cp .env.example .env
 sed -i "s/AIRFLOW_UID=.*/AIRFLOW_UID=$(id -u)/" .env
 docker compose up -d --build
