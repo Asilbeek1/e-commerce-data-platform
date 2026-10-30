@@ -15,9 +15,10 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 ├── docker-compose.yml              # PostgreSQL + контейнер dbt
 ├── docker/
 │   ├── postgres/init/
-│   │   ├── 01_init.sql             # схема raw и 6 таблиц
-│   │   └── 02_seed.sql             # тестовые данные
+│   │   └── 01_init.sql             # схема raw и 6 таблиц
 │   └── dbt/Dockerfile              # образ с dbt-postgres 1.9.1
+├── data/                           # исходные CSV: <таблица>/<таблица>_NNN.csv
+├── ingestion/                      # загрузка последнего CSV каждой таблицы в raw (upsert)
 ├── dbt/
 │   ├── profiles.yml                # подключение dbt к базе
 │   └── ecommerce_analytics/
@@ -79,16 +80,24 @@ cd e-commerce-data-platform
 
 docker network create ecommerce_shared   # один раз: общая сеть для базы, dbt и Airflow
 docker compose up -d
+
+# загрузка CSV из data/ в схему raw (Python ставить не нужно — скрипт запускается в контейнере)
+docker run --rm --network ecommerce_shared -v "$PWD":/app -w /app \
+  -e PGHOST=ecommerce_postgres python:3.11-slim \
+  sh -c "pip install -q -r ingestion/requirements.txt && python ingestion/load_all.py"
+
 docker compose run --rm dbt build
 ```
 
-Проверка: `dbt build` должен закончиться строкой `Done. PASS=44 WARN=0 ERROR=0`.
+Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=44 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
 ```
 
-Ожидается `2000`.
+Ожидается `30`.
+
+Загрузку можно запускать повторно: строки обновляются по первичному ключу, дубликатов не будет. Новые данные кладутся следующим файлом с бо́льшим номером (`orders_002.csv` и т. д.) — загружается только последний файл каждой таблицы.
 
 > Скрипты из `docker/postgres/init/` выполняются только при первом создании базы. Чтобы пересоздать базу с нуля: `docker compose down -v && docker compose up -d`.
 
