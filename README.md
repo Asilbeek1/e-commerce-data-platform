@@ -136,21 +136,6 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 cd ~/e-commerce-data-platform/airflow && docker compose up -d
 ```
 
-Сообщение `already exists` у последней команды — это нормально.
-
-## Частые проблемы
-
-| Симптом | Причина и решение |
-|---|---|
-| `docker: command not found` в Ubuntu | Docker Desktop не запущен или выключена WSL integration (Settings → Resources → WSL integration → Ubuntu) |
-| `localhost refused to connect` | контейнеры не запущены — `docker compose up -d` в обеих папках |
-| «Что-то пошло не так» в DataLens сразу после старта | сервис `us` стартовал раньше своей базы: `cd ~/datalens && docker compose restart us` |
-| `Unable to parse host: ecommerce_postgres` | DataLens не принимает `_` в имени хоста — используйте алиас `ecommerce-postgres` |
-| `password authentication failed` | браузер подставил сохранённый `admin` в поля логина и пароля — введите данные вручную |
-| `HC=1 is not recognized` | команда запущена в PowerShell — откройте Ubuntu |
-| `network ecommerce_shared declared as external, but could not be found` | сеть не создана: `docker network create ecommerce_shared` |
-| задача `dbt_debug` в Airflow падает на подключении | база проекта не запущена — `docker compose up -d` в корне репозитория, затем перезапустите задачу |
-
 ## Airflow
 
 Airflow раз в день запускает dbt, чтобы витрины обновлялись без ручных команд. DAG `ecommerce_dbt_build` состоит из двух задач: `dbt_debug` (проверка подключения) → `dbt_build` (модели и тесты). dbt установлен прямо в образ Airflow и подключается к базе `ecommerce_postgres` через общую сеть `ecommerce_shared`.
@@ -172,4 +157,4 @@ docker compose up -d --build
 
 ## Безопасность
 
-Все пароли в репозитории (`dev_only_change_me`, `admin/admin`, `airflow/airflow`) — только для локальной разработки. Тестовые данные сгенерированы и не содержат реальных клиентов.
+Все пароли в репозитории (`dev_only_change_me`, `admin/admin`, `airflow/airflow`) — только для локальной разработки. 
