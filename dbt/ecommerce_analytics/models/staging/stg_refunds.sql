@@ -17,7 +17,8 @@ cleaned as (
         refund_id,
         order_id,
         amount as refund_amount,
-        status as refund_status,
+        -- old test data uses 'processed', CSV files use 'completed': same meaning
+        case when status = 'processed' then 'completed' else status end as refund_status,
         refunded_at,
         cast(refunded_at as date) as refund_date
     from source
