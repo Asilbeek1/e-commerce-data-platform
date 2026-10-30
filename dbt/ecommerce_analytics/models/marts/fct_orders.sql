@@ -34,7 +34,7 @@ refunds as (
         count(*) as refunds_count,
         sum(refund_amount) as refund_amount
     from {{ ref('stg_refunds') }}
-    where refund_status = 'processed'
+    where refund_status = 'completed'
     group by order_id
 )
 
