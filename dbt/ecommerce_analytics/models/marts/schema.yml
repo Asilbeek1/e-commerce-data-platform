@@ -20,3 +20,20 @@ models:
         data_tests:
           - unique
           - not_null
+
+  - name: fct_orders
+    description: "Одна строка на завершённый заказ: состав, оплата, возвраты, чистая сумма"
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: order_date
+        data_tests:
+          - not_null

@@ -24,7 +24,8 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 │       ├── dbt_project.yml
 │       └── models/
 │           ├── staging/            # очистка сырых данных (views)
-│           └── marts/              # витрины для дашборда (tables)
+│           └── marts/              # витрины и fct_orders (tables)
+│       └── tests/                  # проверки данных (singular tests)
 ├── datalens/
 │   └── ecommerce_workbook.json     # экспорт воркбука DataLens
 └── airflow/
@@ -56,8 +57,9 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
 | `mart_daily_revenue` | по дням: заказы, выручка, средний чек, возвраты, чистая выручка |
 | `mart_sales_by_category` | по дням и категориям: заказы, проданные штуки, выручка |
 | `mart_customers` | по клиентам: число заказов, сумма покупок, первая и последняя покупка |
+| `fct_orders` | факт-таблица: одна строка на заказ — позиции, оплата, возвраты, чистая сумма |
 
-На модели настроены тесты `unique` и `not_null` для ключевых полей.
+На модели настроены тесты `unique`, `not_null` и `relationships` для ключевых полей. В папке `tests/` лежат проверки данных: возврат не больше суммы заказа, сумма заказа равна сумме его позиций.
 
 ## Требования
 
@@ -80,7 +82,7 @@ docker compose up -d
 docker compose run --rm dbt build
 ```
 
-Проверка: `dbt build` должен закончиться строкой `Done. PASS=36 WARN=0 ERROR=0`.
+Проверка: `dbt build` должен закончиться строкой `Done. PASS=44 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
