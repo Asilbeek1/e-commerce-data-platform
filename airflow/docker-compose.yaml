@@ -177,6 +177,9 @@ services:
       - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
       # dbt project from the repository root (models + profiles.yml)
       - ../dbt:/opt/airflow/dbt
+      # CSV ingestion: scripts and source files (read-only)
+      - ../ingestion:/opt/airflow/ingestion:ro
+      - ../data:/opt/airflow/data:ro
     networks:
       - default
       - ecommerce_shared

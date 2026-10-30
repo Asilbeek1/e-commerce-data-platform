@@ -3,9 +3,8 @@
 Учебная платформа данных для интернет-магазина: сырые данные в PostgreSQL, обработка через dbt, визуализация в DataLens. Всё запускается локально в Docker.
 
 ```
-PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
-                          ↑
-                 Airflow (запуск dbt раз в день)
+CSV (data/)  →  PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
+        └──────── Airflow: загрузка + dbt раз в день ────────┘
 ```
 
 ## Структура проекта
@@ -33,7 +32,7 @@ PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens (дашборд)
     ├── docker-compose.yaml         # Airflow 3.3 (CeleryExecutor)
     ├── Dockerfile                  # образ Airflow + dbt
     ├── .env.example                # шаблон настроек (UID, порт)
-    └── dags/dbt_build.py           # DAG: dbt debug → dbt build
+    └── dags/dbt_build.py           # DAG: load_csv → dbt debug → dbt build
 ```
 
 ## Модель данных
@@ -147,7 +146,7 @@ cd ~/e-commerce-data-platform/airflow && docker compose up -d
 
 ## Airflow
 
-Airflow раз в день запускает dbt, чтобы витрины обновлялись без ручных команд. DAG `ecommerce_dbt_build` состоит из двух задач: `dbt_debug` (проверка подключения) → `dbt_build` (модели и тесты). dbt установлен прямо в образ Airflow и подключается к базе `ecommerce_postgres` через общую сеть `ecommerce_shared`.
+Airflow раз в день загружает свежие CSV и пересобирает витрины, без ручных команд. DAG `ecommerce_dbt_build` состоит из трёх задач: `load_csv` (последний CSV каждой таблицы → схема `raw`) → `dbt_debug` (проверка подключения) → `dbt_build` (модели и тесты). Папки `ingestion/` и `data/` подключены к Airflow только на чтение. dbt установлен прямо в образ Airflow и подключается к базе `ecommerce_postgres` через общую сеть `ecommerce_shared`.
 
 Нужно не меньше 4 ГБ свободной памяти для Docker.
 
