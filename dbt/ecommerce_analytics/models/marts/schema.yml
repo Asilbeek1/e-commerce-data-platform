@@ -71,3 +71,11 @@ models:
       - name: category
         data_tests:
           - not_null
+
+  - name: mart_monthly_kpi
+    description: "KPI по месяцам и сравнение с прошлым месяцем: рост выручки, заказов, среднего чека, новых клиентов (в долях) и изменение маржи и доли отмен (в процентных пунктах)."
+    columns:
+      - name: month
+        data_tests:
+          - unique
+          - not_null
