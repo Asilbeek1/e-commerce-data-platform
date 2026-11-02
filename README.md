@@ -59,10 +59,11 @@ CSV (data/)  →  PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens 
 | `mart_customers` | по клиентам: число заказов, сумма покупок, первая и последняя покупка |
 | `fct_orders` | факт-таблица: одна строка на заказ в любом статусе — канал, регион, оплата, возвраты, себестоимость, прибыль, новый/повторный клиент |
 | `fct_order_items` | строки заказов с категорией, каналом и регионом — для разбивок; возврат распределён по строкам, суммы сходятся с `fct_orders` |
+| `mart_monthly_kpi` | KPI по месяцам со сравнением с прошлым месяцем: рост выручки, заказов, среднего чека, новых клиентов; изменение маржи и доли отмен |
 
 **Бизнес-правила:** продажа — заказ в статусе `completed` или `refunded`; чистая выручка = выручка − возвраты; валовая прибыль = чистая выручка − себестоимость (себестоимость считается по `completed`, при полном возврате товар вернулся). Отменённые и незавершённые заказы не дают выручки, но учитываются как потери.
 
-На модели настроены тесты `unique`, `not_null` и `relationships` для ключевых полей. В папке `tests/` лежат проверки данных: возврат не больше суммы заказа, сумма заказа равна сумме его позиций, суммы `fct_order_items` сходятся с `fct_orders`.
+На модели настроены тесты `unique`, `not_null` и `relationships` для ключевых полей. В папке `tests/` лежат проверки данных: возврат не больше суммы заказа, сумма заказа равна сумме его позиций, суммы `fct_order_items` и `mart_monthly_kpi` сходятся с `fct_orders`.
 
 ## Требования
 
@@ -91,7 +92,7 @@ docker run --rm --network ecommerce_shared -v "$PWD":/app -w /app \
 docker compose run --rm dbt build
 ```
 
-Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=55 WARN=0 ERROR=0`.
+Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=59 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
@@ -134,7 +135,7 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 | Username | `analytics_user` |
 | Password | `dev_only_change_me` |
 
-Датасеты создаются из таблиц схемы `analytics`: для дашборда достаточно `fct_orders` и `fct_order_items`.
+Датасеты создаются из таблиц схемы `analytics`: для дашборда достаточно `fct_orders`, `fct_order_items` и `mart_monthly_kpi`.
 
 ## Ежедневный запуск
 

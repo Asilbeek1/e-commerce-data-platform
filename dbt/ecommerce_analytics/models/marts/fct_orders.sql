@@ -37,10 +37,10 @@ order_items as (
 
 payments as (
     -- у части заказов сначала неуспешная попытка, потом успешная:
-    -- способ оплаты берём из успешного платежа
+    -- способ оплаты берём из успешного платежа (paid, или refunded, если деньги вернули)
     select
         order_id,
-        max(case when payment_status = 'paid' then payment_method end) as payment_method,
+        max(case when payment_status in ('paid', 'refunded') then payment_method end) as payment_method,
         sum(case when payment_status = 'paid' then payment_amount else 0 end) as paid_amount,
         max(case when payment_status = 'paid' then payment_date end) as payment_date,
         count(case when payment_status = 'failed' then 1 end) as failed_payments_count
