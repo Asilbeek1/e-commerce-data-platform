@@ -5,6 +5,7 @@ with orders_by_day as (
         count(*) as orders_count,
         sum(amount) as revenue
     from {{ ref('stg_orders') }}
+    where status in ('completed', 'refunded')
     group by order_date
 ),
 

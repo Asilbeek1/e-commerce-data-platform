@@ -43,9 +43,9 @@ CSV (data/)  →  PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens 
 
 | Модель | Что делает |
 |---|---|
-| `stg_orders` | только завершённые заказы (`status = 'completed'`, `amount > 0`) |
-| `stg_customers` | чистит имя, приводит email к нижнему регистру |
-| `stg_products` | чистит название и категорию |
+| `stg_orders` | все заказы с суммой больше 0, в любом статусе, с каналом (`app` / `website`) |
+| `stg_customers` | чистит имя, приводит email к нижнему регистру, регион клиента |
+| `stg_products` | чистит название и категорию, цена и себестоимость |
 | `stg_orders_items` | считает сумму строки `quantity * unit_price` |
 | `stg_payments` | платежи с датой оплаты |
 | `stg_refunds` | возвраты с датой возврата |
@@ -57,9 +57,12 @@ CSV (data/)  →  PostgreSQL (raw)  →  dbt (staging → marts)  →  DataLens 
 | `mart_daily_revenue` | по дням: заказы, выручка, средний чек, возвраты, чистая выручка |
 | `mart_sales_by_category` | по дням и категориям: заказы, проданные штуки, выручка |
 | `mart_customers` | по клиентам: число заказов, сумма покупок, первая и последняя покупка |
-| `fct_orders` | факт-таблица: одна строка на заказ — позиции, оплата, возвраты, чистая сумма |
+| `fct_orders` | факт-таблица: одна строка на заказ в любом статусе — канал, регион, оплата, возвраты, себестоимость, прибыль, новый/повторный клиент |
+| `fct_order_items` | строки заказов с категорией, каналом и регионом — для разбивок; возврат распределён по строкам, суммы сходятся с `fct_orders` |
 
-На модели настроены тесты `unique`, `not_null` и `relationships` для ключевых полей. В папке `tests/` лежат проверки данных: возврат не больше суммы заказа, сумма заказа равна сумме его позиций.
+**Бизнес-правила:** продажа — заказ в статусе `completed` или `refunded`; чистая выручка = выручка − возвраты; валовая прибыль = чистая выручка − себестоимость (себестоимость считается по `completed`, при полном возврате товар вернулся). Отменённые и незавершённые заказы не дают выручки, но учитываются как потери.
+
+На модели настроены тесты `unique`, `not_null` и `relationships` для ключевых полей. В папке `tests/` лежат проверки данных: возврат не больше суммы заказа, сумма заказа равна сумме его позиций, суммы `fct_order_items` сходятся с `fct_orders`.
 
 ## Требования
 
@@ -88,13 +91,13 @@ docker run --rm --network ecommerce_shared -v "$PWD":/app -w /app \
 docker compose run --rm dbt build
 ```
 
-Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=44 WARN=0 ERROR=0`.
+Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=55 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
 ```
 
-Ожидается `30`.
+Ожидается `21354` (заказы за ноябрь 2025 — октябрь 2026).
 
 Загрузку можно запускать повторно: строки обновляются по первичному ключу, дубликатов не будет. Новые данные кладутся следующим файлом с бо́льшим номером (`orders_002.csv` и т. д.) — загружается только последний файл каждой таблицы.
 
@@ -131,7 +134,7 @@ docker network connect --alias ecommerce-postgres datalens_default ecommerce_pos
 | Username | `analytics_user` |
 | Password | `dev_only_change_me` |
 
-Датасеты создаются из таблиц схемы `analytics` (`mart_*` и `fct_orders`).
+Датасеты создаются из таблиц схемы `analytics`: для дашборда достаточно `fct_orders` и `fct_order_items`.
 
 ## Ежедневный запуск
 
