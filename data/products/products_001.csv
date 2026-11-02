@@ -1,13 +1,118 @@
-product_id,product_name,category,list_price
-1001,Wireless Mouse,Electronics,25.00
-1002,Mechanical Keyboard,Electronics,79.00
-1003,USB-C Hub,Electronics,42.50
-1004,Laptop Stand,Accessories,34.00
-1005,Insulated Bottle,Home & Lifestyle,18.00
-1006,Desk Lamp,Home & Lifestyle,29.50
-1007,Running Shoes,Sportswear,89.00
-1008,Backpack,Accessories,54.00
-1009,Yoga Mat,Sportswear,27.00
-1010,Noise-Cancelling Headphones,Electronics,129.00
-1011,Notebook Set,Stationery,12.00
-1012,Power Bank,Electronics,39.00
+product_id,product_name,category,list_price,cost_price
+1001,Wireless Mouse,Electronics,120000.00,70900.00
+1002,Mechanical Keyboard,Electronics,450000.00,313700.00
+1003,USB-C Hub,Electronics,280000.00,184100.00
+1004,Noise-Cancelling Headphones,Electronics,1600000.00,1016300.00
+1005,Power Bank 10000mAh,Electronics,220000.00,139000.00
+1006,Redmi Note 13 Smartphone,Electronics,2700000.00,1975900.00
+1007,Samsung Galaxy A15 Smartphone,Electronics,2400000.00,1819600.00
+1008,Bluetooth Speaker,Electronics,320000.00,189100.00
+1009,Smartwatch,Electronics,650000.00,455100.00
+1010,Wireless Earbuds,Electronics,380000.00,235100.00
+1011,Webcam 1080p,Electronics,290000.00,224000.00
+1012,Fast Charger 65W,Electronics,130000.00,99000.00
+1013,Tablet 10 inch,Electronics,1900000.00,1322900.00
+1014,Action Camera 4K,Electronics,850000.00,614700.00
+1015,Ring Light,Electronics,210000.00,140400.00
+1016,Smart LED Bulb,Electronics,60000.00,44400.00
+1017,Gaming Mouse Pad,Electronics,90000.00,58800.00
+1018,External SSD 500GB,Electronics,780000.00,489800.00
+1019,USB Flash Drive 64GB,Electronics,70000.00,43000.00
+1020,Monitor 24 inch,Electronics,2100000.00,1264300.00
+1021,Laptop Stand,Accessories,150000.00,100600.00
+1022,Backpack,Accessories,280000.00,181800.00
+1023,Phone Case,Accessories,45000.00,31600.00
+1024,Tempered Glass Protector,Accessories,30000.00,16600.00
+1025,Laptop Sleeve,Accessories,140000.00,91400.00
+1026,Leather Wallet,Accessories,160000.00,101400.00
+1027,Sunglasses,Accessories,190000.00,113000.00
+1028,Watch Strap,Accessories,55000.00,37800.00
+1029,Cable Organizer,Accessories,40000.00,26000.00
+1030,Folding Umbrella,Accessories,85000.00,52600.00
+1031,Insulated Bottle,Home & Lifestyle,95000.00,56800.00
+1032,Desk Lamp,Home & Lifestyle,130000.00,97700.00
+1033,Wall Clock,Home & Lifestyle,110000.00,80700.00
+1034,Bed Sheet Set,Home & Lifestyle,420000.00,289600.00
+1035,Memory Foam Pillow,Home & Lifestyle,230000.00,144800.00
+1036,Fleece Blanket,Home & Lifestyle,350000.00,268700.00
+1037,Blackout Curtains,Home & Lifestyle,380000.00,258200.00
+1038,Carpet 3x4m,Home & Lifestyle,1300000.00,844400.00
+1039,Scented Candles Set,Home & Lifestyle,70000.00,53000.00
+1040,Storage Boxes Set,Home & Lifestyle,160000.00,99800.00
+1041,Wall Mirror,Home & Lifestyle,240000.00,170400.00
+1042,Plant Pot Set,Home & Lifestyle,90000.00,56000.00
+1043,Running Shoes,Sportswear,520000.00,317300.00
+1044,Yoga Mat,Sportswear,140000.00,99600.00
+1045,Sports T-Shirt,Sportswear,110000.00,66300.00
+1046,Training Shorts,Sportswear,120000.00,79600.00
+1047,Tracksuit,Sportswear,480000.00,328000.00
+1048,Dumbbells 5kg Pair,Sportswear,260000.00,154300.00
+1049,Jump Rope,Sportswear,40000.00,28700.00
+1050,Resistance Bands,Sportswear,85000.00,57500.00
+1051,Sports Bag,Sportswear,210000.00,145500.00
+1052,Football,Sportswear,190000.00,120800.00
+1053,Notebook Set,Stationery,55000.00,35600.00
+1054,Gel Pens 12pcs,Stationery,35000.00,23200.00
+1055,School Backpack,Stationery,310000.00,204000.00
+1056,Pencil Case,Stationery,45000.00,31700.00
+1057,Colour Markers,Stationery,60000.00,41000.00
+1058,Planner 2026,Stationery,90000.00,58100.00
+1059,A4 Paper 500 sheets,Stationery,75000.00,41300.00
+1060,Scientific Calculator,Stationery,85000.00,62300.00
+1061,Sticky Notes,Stationery,25000.00,16700.00
+1062,Watercolour Set,Stationery,95000.00,59400.00
+1063,Mens Jeans,Clothing,340000.00,226100.00
+1064,Womens Dress,Clothing,420000.00,240000.00
+1065,Winter Jacket,Clothing,950000.00,720200.00
+1066,Hoodie,Clothing,310000.00,241100.00
+1067,Knit Sweater,Clothing,280000.00,157800.00
+1068,Socks 5 pairs,Clothing,50000.00,31600.00
+1069,Wool Scarf,Clothing,120000.00,86100.00
+1070,Winter Gloves,Clothing,80000.00,49800.00
+1071,Mens Shirt,Clothing,230000.00,156500.00
+1072,Sneakers,Clothing,480000.00,310000.00
+1073,Womens Boots,Clothing,720000.00,524200.00
+1074,Knit Beanie,Clothing,70000.00,53900.00
+1075,Face Cream,Beauty & Care,130000.00,98100.00
+1076,Shampoo,Beauty & Care,90000.00,62400.00
+1077,Perfume 50ml,Beauty & Care,420000.00,246500.00
+1078,Hair Dryer,Beauty & Care,260000.00,199600.00
+1079,Electric Shaver,Beauty & Care,310000.00,172200.00
+1080,Lipstick,Beauty & Care,95000.00,58800.00
+1081,Makeup Brush Set,Beauty & Care,120000.00,73800.00
+1082,Sunscreen SPF50,Beauty & Care,110000.00,77500.00
+1083,Body Lotion,Beauty & Care,85000.00,56300.00
+1084,Hair Straightener,Beauty & Care,340000.00,194300.00
+1085,Electric Toothbrush,Beauty & Care,280000.00,154800.00
+1086,Non-Stick Frying Pan,Kitchen,190000.00,130900.00
+1087,Cookware Pot Set,Kitchen,650000.00,431000.00
+1088,Electric Kettle,Kitchen,240000.00,165200.00
+1089,Blender,Kitchen,420000.00,285500.00
+1090,Kitchen Knife Set,Kitchen,230000.00,173600.00
+1091,Lunch Box,Kitchen,85000.00,64700.00
+1092,Thermos 1L,Kitchen,180000.00,106800.00
+1093,Air Fryer,Kitchen,1100000.00,843400.00
+1094,Coffee Grinder,Kitchen,260000.00,190100.00
+1095,Dinner Plates Set 12pc,Kitchen,380000.00,264900.00
+1096,Rice Cooker,Kitchen,520000.00,364900.00
+1097,Cutting Board,Kitchen,70000.00,47300.00
+1098,Building Blocks Set,Kids & Toys,390000.00,296800.00
+1099,Fashion Doll,Kids & Toys,140000.00,84500.00
+1100,RC Car,Kids & Toys,260000.00,178800.00
+1101,Puzzle 1000pcs,Kids & Toys,90000.00,66400.00
+1102,Kids Backpack,Kids & Toys,190000.00,110400.00
+1103,Board Game,Kids & Toys,160000.00,110700.00
+1104,Baby Stroller,Kids & Toys,1800000.00,1156800.00
+1105,Kids Sneakers,Kids & Toys,260000.00,188800.00
+1106,Diapers Pack,Kids & Toys,180000.00,101800.00
+1107,Plush Toy,Kids & Toys,100000.00,69000.00
+1108,Vacuum Cleaner,Appliances,1500000.00,1120700.00
+1109,Steam Iron,Appliances,280000.00,194500.00
+1110,Microwave Oven,Appliances,1600000.00,998300.00
+1111,Table Fan,Appliances,450000.00,315400.00
+1112,Electric Heater,Appliances,520000.00,326400.00
+1113,Air Humidifier,Appliances,330000.00,232200.00
+1114,Robot Vacuum,Appliances,2900000.00,1680600.00
+1115,Hair Clipper,Appliances,150000.00,92200.00
+1116,Water Filter Jug,Appliances,380000.00,211900.00
+1117,Pedestal Fan,Appliances,620000.00,353000.00

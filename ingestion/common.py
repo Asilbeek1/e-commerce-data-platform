@@ -11,7 +11,8 @@ from psycopg2 import sql
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
-# Each table's primary key and CSV/database columns.
+
+
 TABLES = {
     "customers": {
         "primary_key": "customer_id",
@@ -19,6 +20,7 @@ TABLES = {
             "customer_id",
             "full_name",
             "email",
+            "region",
             "registered_at",
         ],
     },
@@ -29,6 +31,7 @@ TABLES = {
             "product_name",
             "category",
             "list_price",
+            "cost_price",
         ],
     },
     "orders": {
@@ -38,6 +41,7 @@ TABLES = {
             "customer_id",
             "amount",
             "status",
+            "channel",
             "created_at",
         ],
     },
@@ -74,7 +78,7 @@ TABLES = {
     },
 }
 
-# Load parent records before records that reference them.
+# Load parent records before dependent records.
 LOAD_ORDER = [
     "customers",
     "products",
@@ -84,28 +88,53 @@ LOAD_ORDER = [
     "refunds",
 ]
 
-
 def get_connection():
     """Connect to the existing ecommerce PostgreSQL database."""
+
     return psycopg2.connect(
-        host=os.getenv("PGHOST", "localhost"),
-        port=os.getenv("PGPORT", "5432"),
-        dbname=os.getenv("POSTGRES_DB", "ecommerce"),
-        user=os.getenv("POSTGRES_USER", "analytics_user"),
-        password=os.getenv("POSTGRES_PASSWORD", "dev_only_change_me"),
+        host=os.getenv(
+            "PGHOST",
+            os.getenv("POSTGRES_HOST", "localhost"),
+        ),
+        port=os.getenv(
+            "PGPORT",
+            os.getenv("POSTGRES_PORT", "5432"),
+        ),
+        dbname=os.getenv(
+            "PGDATABASE",
+            os.getenv("POSTGRES_DB", "ecommerce"),
+        ),
+        user=os.getenv(
+            "PGUSER",
+            os.getenv("POSTGRES_USER", "analytics_user"),
+        ),
+        password=os.getenv(
+            "PGPASSWORD",
+            os.getenv("POSTGRES_PASSWORD", "dev_only_change_me"),
+        ),
     )
 
 
-def get_latest_csv(table_name):
+def get_csv_files(table_name):
     """
-    Find the CSV with the highest numeric suffix.
+    Return all numbered CSV files in ascending order.
 
     Example:
         orders_001.csv
         orders_002.csv
-        orders_010.csv  <- selected
+        orders_010.csv
     """
+
+    if table_name not in TABLES:
+        raise ValueError(f"Unknown table: {table_name}")
+
     folder = DATA_DIR / table_name
+
+    if not folder.exists():
+        raise FileNotFoundError(
+            f"Data directory does not exist: {folder}"
+        )
+
     pattern = re.compile(
         rf"^{re.escape(table_name)}_(\d+)\.csv$"
     )
@@ -121,34 +150,24 @@ def get_latest_csv(table_name):
 
     if not candidates:
         raise FileNotFoundError(
-            f"No matching CSV files found in {folder}"
+            f"No numbered CSV files found in {folder}"
         )
 
-    return max(candidates, key=lambda item: item[0])[1]
+    # Sort numerically, not alphabetically.
+    candidates.sort(key=lambda item: item[0])
 
-
-def already_processed(conn, table_name, file_name):
-    """Return True if this file was previously loaded successfully."""
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT 1
-            FROM raw.ingestion_file_log
-            WHERE table_name = %s
-              AND file_name = %s
-              AND status = 'success'
-            """,
-            (table_name, file_name),
-        )
-
-        return cur.fetchone() is not None
+    return [path for _, path in candidates]
 
 
 def read_csv(file_path, expected_columns):
-    """Read a CSV and verify that its required columns are present."""
+    """Read a CSV and validate its required columns."""
+
     with file_path.open(
-        "r", encoding="utf-8-sig", newline=""
+        "r",
+        encoding="utf-8-sig",
+        newline="",
     ) as file:
+
         reader = csv.DictReader(file)
 
         if reader.fieldnames is None:
@@ -165,61 +184,34 @@ def read_csv(file_path, expected_columns):
         rows = []
 
         for row in reader:
-            # Ignore extra columns; use only the target table columns.
-            cleaned_row = {
-                column: (
-                    row[column].strip()
-                    if row[column] is not None
-                    else None
-                )
-                for column in expected_columns
-            }
+            cleaned_row = {}
 
-            # Interpret empty CSV cells as SQL NULL.
-            cleaned_row = {
-                column: (
+            for column in expected_columns:
+                value = row[column]
+
+                if value is not None:
+                    value = value.strip()
+
+                cleaned_row[column] = (
                     None if value == "" else value
                 )
-                for column, value in cleaned_row.items()
-            }
 
             rows.append(cleaned_row)
 
         return rows
 
 
-def mark_processing(table_name, file_name):
-    """Record that ingestion of this file has started."""
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO raw.ingestion_file_log (
-                    table_name,
-                    file_name,
-                    status,
-                    rows_loaded,
-                    processed_at
-                )
-                VALUES (%s, %s, 'processing', NULL, NULL)
-                ON CONFLICT (table_name, file_name)
-                DO UPDATE SET
-                    status = 'processing',
-                    rows_loaded = NULL,
-                    processed_at = NULL
-                """,
-                (table_name, file_name),
-            )
-
-
 def upsert_rows(conn, table_name, rows):
     """
-    Insert new rows and update existing rows on primary-key conflicts.
+    Insert new records and update existing records
+    when their primary keys already exist.
     """
+
     if not rows:
-        return
+        return 0
 
     config = TABLES[table_name]
+
     columns = config["columns"]
     primary_key = config["primary_key"]
 
@@ -239,13 +231,19 @@ def upsert_rows(conn, table_name, rows):
     ).format(
         sql.Identifier("raw"),
         sql.Identifier(table_name),
+
         sql.SQL(", ").join(
-            sql.Identifier(column) for column in columns
+            sql.Identifier(column)
+            for column in columns
         ),
+
         sql.SQL(", ").join(
-            sql.Placeholder() for _ in columns
+            sql.Placeholder()
+            for _ in columns
         ),
+
         sql.Identifier(primary_key),
+
         sql.SQL(", ").join(
             sql.SQL("{} = EXCLUDED.{}").format(
                 sql.Identifier(column),
@@ -255,30 +253,90 @@ def upsert_rows(conn, table_name, rows):
         ),
     )
 
+    values = [
+        tuple(row[column] for column in columns)
+        for row in rows
+    ]
+
     with conn.cursor() as cur:
-        for row in rows:
-            values = tuple(row[column] for column in columns)
-            cur.execute(insert_query, values)
+        cur.executemany(insert_query, values)
+
+    return len(rows)
 
 
+def load_table(table_name, conn=None):
+    """
+    Load every numbered CSV for one table.
 
-def load_table(table_name):
-    """Load the latest CSV for one table using UPSERT."""
+    If a connection is provided, reuse it.
+    Otherwise, create a separate connection.
+    """
+
     if table_name not in TABLES:
         raise ValueError(f"Unknown table: {table_name}")
 
-    file_path = get_latest_csv(table_name)
+    if conn is None:
+        with get_connection() as connection:
+            return load_table(table_name, connection)
 
-    print(f"\n[{table_name}] Latest CSV: {file_path.name}")
+    files = get_csv_files(table_name)
 
-    rows = read_csv(file_path, TABLES[table_name]["columns"])
+    total_rows = 0
 
-    # Insert new records or update existing records.
-    with get_connection() as conn:
-        upsert_rows(conn, table_name, rows)
+    print(f"\n[{table_name}] Found {len(files)} CSV file(s)")
+
+    for file_path in files:
+        print(f"[{table_name}] Processing {file_path.name}")
+
+        rows = read_csv(
+            file_path,
+            TABLES[table_name]["columns"],
+        )
+
+        loaded = upsert_rows(
+            conn,
+            table_name,
+            rows,
+        )
+
+        total_rows += loaded
+
+        print(
+            f"[{table_name}] Processed {loaded} rows "
+            f"from {file_path.name}"
+        )
 
     print(
-        f"[{table_name}] Successfully processed "
-        f"{len(rows)} rows from {file_path.name}"
+        f"[{table_name}] Total processed: {total_rows} rows"
     )
 
+    return total_rows
+
+
+def load_all():
+    """
+    Load all six tables in dependency order.
+
+    All tables share one transaction:
+    if any table fails, all changes are rolled back.
+    """
+
+    total_rows = 0
+
+    with get_connection() as conn:
+
+        for table_name in LOAD_ORDER:
+            total_rows += load_table(
+                table_name,
+                conn,
+            )
+
+    print("\nIngestion completed successfully.")
+    print(f"Total rows processed: {total_rows}")
+
+    return total_rows
+
+
+if __name__ == "__main__":
+    load_all()
+    
