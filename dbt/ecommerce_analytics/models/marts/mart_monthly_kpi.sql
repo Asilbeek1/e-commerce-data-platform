@@ -8,6 +8,7 @@ with monthly as (
         count(*) as all_orders,
         count(case when is_sold then 1 end) as sold_orders,
         count(case when is_cancelled then 1 end) as cancelled_orders,
+        count(case when is_cancelled and had_failed_payment then 1 end) as cancelled_after_failed_payment,
         sum(gross_revenue) as gross_revenue,
         sum(refund_amount) as refund_amount,
         sum(net_revenue) as net_revenue,
@@ -25,6 +26,8 @@ with_ratios as (
         gross_revenue / nullif(sold_orders, 0) as avg_order_value,
         gross_profit / nullif(net_revenue, 0) as margin,
         cancelled_orders * 1.0 / nullif(all_orders, 0) as cancel_rate,
+        -- доля отмен, которым предшествовала неуспешная оплата
+        cancelled_after_failed_payment * 1.0 / nullif(cancelled_orders, 0) as failed_payment_cancel_share,
         refund_amount / nullif(gross_revenue, 0) as refund_rate
     from monthly
 ),

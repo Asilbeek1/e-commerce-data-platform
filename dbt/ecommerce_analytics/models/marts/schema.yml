@@ -41,6 +41,12 @@ models:
         data_tests:
           - accepted_values:
               values: ['completed', 'refunded', 'cancelled', 'pending', 'processing']
+      - name: had_failed_payment
+        description: "true, если у заказа была хотя бы одна неуспешная попытка оплаты"
+        data_tests:
+          - not_null
+      - name: failed_payment_method
+        description: "способ оплаты неуспешной попытки (пусто, если неуспешных не было)"
       - name: customer_type
         description: "new = первая покупка клиента, returning = повторная; пусто для непроданных заказов"
         data_tests:
