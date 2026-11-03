@@ -43,7 +43,8 @@ payments as (
         max(case when payment_status in ('paid', 'refunded') then payment_method end) as payment_method,
         sum(case when payment_status = 'paid' then payment_amount else 0 end) as paid_amount,
         max(case when payment_status = 'paid' then payment_date end) as payment_date,
-        count(case when payment_status = 'failed' then 1 end) as failed_payments_count
+        count(case when payment_status = 'failed' then 1 end) as failed_payments_count,
+        max(case when payment_status = 'failed' then payment_method end) as failed_payment_method
     from {{ ref('stg_payments') }}
     group by order_id
 ),
@@ -86,6 +87,8 @@ joined as (
         p.payment_date,
         coalesce(p.paid_amount, 0) >= o.amount as is_paid,
         coalesce(p.failed_payments_count, 0) as failed_payments_count,
+        coalesce(p.failed_payments_count, 0) > 0 as had_failed_payment,
+        p.failed_payment_method,
         coalesce(r.refund_amount, 0) as refund_amount,
         case when o.status = 'completed' then coalesce(i.items_cost, 0) else 0 end as cost_amount,
         case

@@ -92,7 +92,7 @@ docker run --rm --network ecommerce_shared -v "$PWD":/app -w /app \
 docker compose run --rm dbt build
 ```
 
-Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=59 WARN=0 ERROR=0`.
+Проверка: загрузка заканчивается строкой `All ingestion tasks completed successfully.`, `dbt build` — строкой `Done. PASS=60 WARN=0 ERROR=0`.
 
 ```bash
 docker exec -it ecommerce_postgres psql -U analytics_user -d ecommerce -c "select count(*) from raw.orders;"
